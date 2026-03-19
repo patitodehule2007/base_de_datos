@@ -98,8 +98,29 @@ SELECT ObtenerGanacia(10100,"S18_1749") AS ganacia;
 
 # 8
 
+DELIMITER //
 
-CREATE FUNCTION 
+CREATE FUNCTION isTheOrderCanceled(
+p_order_Number int
+)
+RETURNS int
+DETERMINISTIC
+BEGIN
+	DECLARE v_status VARCHAR(256);
+	SELECT o.status INTO v_status FROM orders o 
+	WHERE o.orderNumber  = p_order_Number;
+
+	IF v_status = "Cancelled" THEN 
+		RETURN -1;
+	END IF;
+	RETURN 0;
+END // 
+DELIMITER ;
+
+
+
+
+SELECT isTheOrderCanceled(10179);
 
 
 # 10
@@ -138,3 +159,4 @@ END //
 DELIMITER ;
 
 SELECT BuscanVentasPorDebajoPrecioRecomendado("S10_1678");
+
