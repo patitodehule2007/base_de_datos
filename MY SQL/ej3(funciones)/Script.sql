@@ -160,3 +160,48 @@ DELIMITER ;
 
 SELECT BuscanVentasPorDebajoPrecioRecomendado("S10_1678");
 
+#12
+
+DROP FUNCTION IF EXISTS FindBestPaidProdInPeriod;
+
+DELIMITER //
+
+CREATE FUNCTION FindBestPaidProdInPeriod(
+p_start_date DATE,
+p_end_date DATE,
+p_prod_code VARCHAR(256)
+)
+RETURNS float
+DETERMINISTIC
+BEGIN
+
+	DECLARE v_RES float;
+
+	
+
+	SELECT o.priceEach INTO v_RES FROM products p 	
+	JOIN orderdetails o ON o.productCode = p.productCode 
+	JOIN orders o2 ON o2.orderDate  BETWEEN  p_start_date AND p_end_date
+	WHERE p.productCode = p_prod_code
+	ORDER BY o.priceEach   DESC
+	LIMIT 1;
+	
+	IF(v_RES IS null) THEN
+		RETURN 0;
+	
+	END IF;
+	RETURN v_RES;
+	
+	
+	
+
+END //
+DELIMITER ;
+
+
+ SELECT  FindBestPaidProdInPeriod(
+DATE_SUB(CURRENT_DATE, INTERVAL 50 YEAR), 
+   CURRENT_DATE,
+ "S10_1678") AS FindBestPaidProdInPeriod;
+
+ 
