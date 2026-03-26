@@ -65,7 +65,7 @@ DROP PROCEDURE IF EXISTS DeleteProductLine //
 
 CREATE PROCEDURE IF NOT EXISTS DeleteProductLine(IN p_product_Line_code VARCHAR(256) ,OUT p_text_res VARCHAR(256))
 BEGIN
-	IF EXISTS(SELECT * FROM products p WHERE p.productLine  = p_product_Line_code) THEN
+	IF (Producs_on_Lines(p_product_Line_code) <> 0) THEN
 	SELECT "La línea de productos no pudo borrarse porque contiene productos asociados" INTO p_text_res;
 	ELSE
 		DELETE FROM productlines 

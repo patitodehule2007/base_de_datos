@@ -71,6 +71,26 @@ END;
 delimiter ;
 
 SELECT obtener_oficina_Empleado(484);
+# 4
+
+DELIMITER //
+DROP FUNCTION if exists Producs_on_Lines //
+
+CREATE FUNCTION IF NOT EXISTS Producs_on_Lines(
+	p_productLine VARCHAR(256)
+)
+RETURNS int
+DETERMINISTIC
+BEGIN
+	RETURN (
+		SELECT count(p.productCode) FROM products p
+		WHERE p.productLine = p_productLine
+	);
+END
+
+delimiter ;
+SELECT Producs_on_lines("Classic Cars") AS Products_On_Lines;
+
 
 
 # 7
