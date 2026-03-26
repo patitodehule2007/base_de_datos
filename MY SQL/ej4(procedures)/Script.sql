@@ -103,3 +103,48 @@ DELIMITER ;
 
 CALL Modify_order_coment(10100,"pepe",@Modify_order_coment_opCode);
 SELECT @Modify_order_coment_opCode AS Res;
+
+
+
+
+# 9
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS  ListaCiudades //
+
+CREATE PROCEDURE IF NOT EXISTS ListaCiudades(OUT p_listaCiudades VARCHAR(4000)  )
+BEGIN
+	DECLARE hayFilas int DEFAULT 1;
+	DECLARE ciudad varchar(256);
+	declare Ciudad_cursor cursor for SELECT DISTINCT o.city  FROM offices o ;
+
+	declare continue handler for not found set hayFilas = 0;
+	
+	SET p_listaCiudades = "";
+	
+	open Ciudad_cursor;
+		bucle:loop
+			fetch Ciudad_cursor into ciudad;
+			if hayFilas = 0 then
+				leave bucle;
+			end if;
+				SET p_listaCiudades = CONCAT(p_listaCiudades, ciudad, ', ');
+				
+			end loop bucle;
+	close Ciudad_cursor;
+
+END //
+
+DELIMITER ;
+
+CALL ListaCiudades(@Lista_Ciudades_res);
+SELECT @Lista_Ciudades_res;
+
+
+
+
+
+
+
+ 
