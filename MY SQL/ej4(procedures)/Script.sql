@@ -144,7 +144,63 @@ SELECT @Lista_Ciudades_res;
 
 
 
+# 10
+
+
+CREATE TABLE `Canceled_orders` (
+  `orderNumber` int NOT NULL,
+  `orderDate` date NOT NULL,
+  `requiredDate` date NOT NULL,
+  `shippedDate` date DEFAULT NULL,
+  `status` varchar(15) NOT NULL,
+  `comments` text,
+  `customerNumber` int NOT NULL,
+  PRIMARY KEY (`orderNumber`),
+  KEY `customerNumber` (`customerNumber`),
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`customerNumber`) REFERENCES `customers` (`customerNumber`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 
- 
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS insertCancelledOrders //
+
+CREATE PROCEDURE insertCancelledOrders(OUT p_numMovidos int)
+BEGIN 
+	DECLARE v_orderNumber INT;
+	DECLARE v_orderDate DATE;
+	DECLARE v_requiredDate DATE;
+	DECLARE v_shippedDate DATE;
+	DECLARE v_status VARCHAR(256);
+	DECLARE v_comments VARCHAR(256);
+	DECLARE v_customerNumber INT;
+
+	DECLARE sigue TINYINT DEFAULT 1;
+
+	DECLARE ordenesCanceladas CURSOR  FOR (SELECT orderNumber,orderDate,requiredDate,shippedDate,status,comments,customerNumber FROM orders o WHERE o.status = "Cancelled");
+	DECLARE CONTINUE handler FOR NOT FOUND SET sigue = 0;
+	
+	SET p_numMovidos = 0;
+	OPEN ordenesCanceladas;
+	
+	bucle:LOOP
+		FETCH ordenesCanceladas INTO v_orderNumber,v_orderDate,v_requiredDate,v_shippedDate,v_status,v_comments,v_customerNumber;
+		IF sigue = 0 THEN
+			LEAVE bucle;
+		END IF;
+		INSERT INTO Canceled_orders (orderNumber, orderDate, requiredDate, shippedDate, status, comments,customerNumber)
+		VALUES (v_orderNumber, v_orderDate, v_requiredDate, v_shippedDate, v_status, v_comments,v_customerNumber);
+		SET  p_numMovidos = p_numMovidos + 1;
+	END LOOP;
+	CLOSE ordenesCanceladas;
+	
+	
+END //
+
+CALL insertCancelledOrders(@numMovidos) //
+SELECT @numMovidos //
+
+
+DELIMITER ;
+
