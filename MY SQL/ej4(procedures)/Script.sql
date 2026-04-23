@@ -249,3 +249,54 @@ DELIMITER ;
 
 
 CALL obtenerPedidos(363)
+
+
+# 13 
+
+
+DROP PROCEDURE IF EXISTS actualizarComision;
+
+DELIMITER //
+CREATE PROCEDURE actualizarComision()
+BEGIN 
+	DECLARE sig int DEFAULT 1;
+	DECLARE v_comision int;
+	DECLARE v_employee_number int;
+	DECLARE v_sell_sum float;
+	DECLARE sellsSum CURSOR FOR
+		SELECT e.employeeNumber,SUM(o2.priceEach *o2.quantityOrdered ) FROM employees e 
+		JOIN customers c ON c.salesRepEmployeeNumber = e.employeeNumber 
+		JOIN orders o ON o.customerNumber = c.customerNumber 
+		JOIN orderdetails o2 ON o2.orderNumber = o.orderNumber 
+		GROUP BY e.employeeNumber;
+	DECLARE CONTINUE handler FOR NOT FOUND SET sig = 0;
+	OPEN sellsSum;
+		bucle:LOOP
+			FETCH sellsSum INTO v_employee_number,v_sell_sum;
+			IF sig = 0 THEN
+				LEAVE bucle;
+			END IF;
+			
+			IF(v_sell_sum > 100000) THEN
+				SET v_comision = 5;
+			ELSEIF(v_sell_sum > 50000) THEN
+				SET v_comision = 3;
+			ELSE 
+				SET v_comision = 0;
+			END IF;
+			
+			UPDATE employees 
+				SET comision = v_comision
+				WHERE employeeNumber = v_employee_number;
+	
+			
+		END LOOP;
+		
+	CLOSE sellsSum;
+	
+END
+
+DELIMITER ;
+
+
+CALL actualizarComision();
