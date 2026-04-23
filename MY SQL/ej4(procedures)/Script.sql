@@ -204,3 +204,48 @@ SELECT @numMovidos //
 
 DELIMITER ;
 
+
+
+
+# 11
+
+
+
+DROP PROCEDURE IF EXISTS obtenerPedidos;
+
+DELIMITER //
+
+
+CREATE PROCEDURE obtenerPedidos(IN p_codigo_cliente int)
+BEGIN 
+	DECLARE sig int DEFAULT 1;
+	DECLARE v_order_num int;
+	DECLARE v_sum float;
+	DECLARE orderSums CURSOR FOR(
+		SELECT o2.orderNumber, SUM(o2.quantityOrdered * o2.priceEach )  FROM orders o 
+		JOIN orderdetails o2 ON o2.orderNumber  = o.orderNumber
+		WHERE o.customerNumber = p_codigo_cliente
+		GROUP BY o2.orderNumber
+	);
+	DECLARE CONTINUE handler FOR NOT FOUND SET sig = 0;
+	OPEN orderSums;
+		bucle:LOOP
+			FETCH orderSums INTO v_order_num,v_sum;
+			IF sig = 0 THEN
+				LEAVE bucle;
+			END IF;
+	
+			UPDATE orders
+				SET comments = CONCAT("El total de la orden es ",v_sum )
+				WHERE comments IS NULL
+				AND orderNumber = v_order_num
+				AND customerNumber = p_codigo_cliente;
+		END LOOP;
+	CLOSE orderSums;
+END
+
+
+DELIMITER ;
+
+
+CALL obtenerPedidos(363)
