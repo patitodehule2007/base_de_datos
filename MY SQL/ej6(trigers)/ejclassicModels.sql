@@ -188,3 +188,21 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- 3
+
+DELIMITER //
+
+CREATE TRIGGER RESTRICT_delete BEFORE DELETE ON  producto FOR EACH ROW
+BEGIN
+	IF(	
+	SELECT 1 FROM orders o 
+	JOIN  orderdetails o2 ON o.orderNumber = o2.orderNumber 
+	WHERE o.orderDate > (NOW() - INTERVAL 3 MONTH)
+	) THEN
+		SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'No se puede borrar el cliente: tiene pedidos activos en los últimos 3 meses.';
+	END IF;
+END
+
+DELIMITER ;
