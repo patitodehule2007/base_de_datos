@@ -75,3 +75,20 @@ BEGIN
     UPDATE producto p
     SET precio = 1.1*(SELECT pp.precio from producto_proveedor pp WHERE codProducto = p.codProducto);
 end;
+
+
+-- 5
+CREATE PROCEDURE update_pedidos_price()
+BEGIN
+    UPDATE pedido_producto pp
+    SET precioUnitario = (
+        select producto.precio from producto
+        where codProducto = pp.precioUnitario
+    )
+    WHERE pp.Pedido_idPedido in(
+        SELECT * FROm pedido
+        join stocks.estado e on e.idEstado = pedido.Estado_idEstado
+        WHERE pedido.Estado_idEstado = 'pendiente'
+        );
+end;
+
