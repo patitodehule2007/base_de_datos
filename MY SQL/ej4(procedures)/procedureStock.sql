@@ -67,3 +67,11 @@ BEGIN
 end;
 
 DELIMITER ;
+
+-- 3
+
+CREATE PROCEDURE  update_Prices()
+BEGIN
+    UPDATE producto p
+    SET precio = 1.1*(SELECT pp.precio from producto_proveedor pp WHERE codProducto = p.codProducto);
+end;
